@@ -24,7 +24,6 @@ const BlogTableitem = ({
           src={author_img ? author_img : assets.profile_icon}
         />
 
-
         <p>{author ? author : "No author"}</p>
       </th>
       <td className="px-6 py-4 ">{title ? title : "No title"}</td>

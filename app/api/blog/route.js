@@ -1,10 +1,18 @@
 import { connectDB } from "@/lib/config/db";
 import { NextResponse } from "next/server";
+import BlogModel from "@/lib/models/BlogModel";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
-import BlogModel from "@/lib/models/BlogModel";
-const fs = require("fs");  
-//api endpoint to get all blogs
+import cloudinary from "cloudinary";
+import streamifier from "streamifier";
+
+// Configure Cloudinary
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 export async function GET(request) {
   try {
     await connectDB();
@@ -22,73 +30,56 @@ export async function GET(request) {
   }
 }
 
-// api endpoint for uploading data
 export async function POST(request) {
   try {
-    // 🔹 DB connect
     await connectDB();
-
-    // 🔹 Get formData
     const formData = await request.formData();
-    // console.log("FormData received:", formData);
-
     const file = formData.get("image");
 
     if (!file) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // 🔹 Convert file → buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    // Convert file to buffer
+    const buffer = Buffer.from(await file.arrayBuffer());
 
-    // 🔹 Ensure uploads folder exists
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
+    // Upload to Cloudinary using stream
+    const uploadFromBuffer = (buffer) =>
+      new Promise((resolve, reject) => {
+        const stream = cloudinary.v2.uploader.upload_stream(
+          { folder: "blog_images" },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          }
+        );
+        streamifier.createReadStream(buffer).pipe(stream);
+      });
 
-    // 🔹 Unique filename
-    const fileName = `${Date.now()}-${file.name}`;
-    const filePath = path.join(uploadDir, fileName);
-    // console.log("Saving to:", filePath);
+    const uploadResponse = await uploadFromBuffer(buffer);
 
-    // 🔹 Write file to server
-    await writeFile(filePath, buffer);
-    const imgUrl = `/uploads/${fileName}`;
-
-    // console.log("File saved at:", imgUrl);
-
-    // Blog data prepare karo
+    // Save blog data
     const blogData = {
-      title: `${formData.get("title")}`,
-      description: `${formData.get("description")}`,
-      category: `${formData.get("category")}`,
-      author: `${formData.get("author")}`,
-      author_img: "/uploads/author_img.png",
-      image: `${imgUrl}`,
+      title: formData.get("title"),
+      description: formData.get("description"),
+      category: formData.get("category"),
+      author: formData.get("author"),
+      author_img: uploadResponse.secure_url,
+      image: uploadResponse.secure_url,
       date: Date.now(),
+      cloudinary_id: uploadResponse.public_id,
     };
+
     await BlogModel.create(blogData);
 
-    //  Ab response me dono bhej do
     return NextResponse.json({
       success: true,
-      message: "Blog added successfully ",
+      message: "Blog added successfully 🚀",
+      imageUrl: uploadResponse.secure_url,
     });
   } catch (error) {
-    console.error("Error uploading image:", error);
+    console.error("Cloudinary upload error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-
-export async function DELETE(request) {
-  const id = request.nextUrl.searchParams.get("id");
-  const blog = await BlogModel.findById(id);
-  fs.unlink(`./public/uploads${blog.image}`,()=>{})
-  await BlogModel.findByIdAndDelete(id);
-  return NextResponse.json({msg:"Blog deleted "})
-
-
-
-
-
-}
+  
