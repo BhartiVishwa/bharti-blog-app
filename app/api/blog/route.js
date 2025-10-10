@@ -46,14 +46,22 @@ export async function POST(request) {
     // Upload to Cloudinary using stream
     const uploadFromBuffer = (buffer) =>
       new Promise((resolve, reject) => {
-        const stream = cloudinary.v2.uploader.upload_stream(
-          { folder: "blog_images" },
-          (error, result) => {
-            if (error) return reject(error);
-            resolve(result);
-          }
-        );
-        streamifier.createReadStream(buffer).pipe(stream);
+        try {
+          const stream = cloudinary.v2.uploader.upload_stream(
+            { folder: "blog_images", resource_type: "image" },
+            (error, result) => {
+              if (error) {
+                console.error("Cloudinary upload failed:", error);
+                return reject(error);
+              }
+              resolve(result);
+            }
+          );
+          streamifier.createReadStream(buffer).pipe(stream);
+        } catch (err) {
+          console.error("Upload stream error:", err);
+          reject(err);
+        }
       });
 
     const uploadResponse = await uploadFromBuffer(buffer);
@@ -82,4 +90,3 @@ export async function POST(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-  
