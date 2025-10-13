@@ -37,6 +37,7 @@ const fetchBlogData = async () => {
           />
         </Link>
        
+       <Link href={'/admin'}>
           <button
             className="flex items-center gap-2 font-medium py-1 px-3 sm:py-2 sm:px-6 border border-solid border-black shadow-[-7px_7px_0px_#000000] 
               active:translate-y-1 active:translate-x-1 active:shadow-none transition-all 
@@ -44,6 +45,7 @@ const fetchBlogData = async () => {
           >
             Get Started <Image src={assets.arrow} alt="arrow" />
           </button>
+          </Link>
           
         </div>
         <div className="text-center my-24">

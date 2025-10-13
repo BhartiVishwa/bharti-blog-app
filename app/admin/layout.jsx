@@ -6,6 +6,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function Layout({ children }) {
   return (
+  
+
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <ToastContainer theme="dark"/>
@@ -25,5 +27,7 @@ export default function Layout({ children }) {
         </div>
       </div>
     </div>
+   
   );
+ 
 }
