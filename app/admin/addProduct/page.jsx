@@ -1,13 +1,15 @@
 "use client";
 import { assets } from "@/Assets/assets";
 import axios from "axios";
-import { set } from "mongoose";
 import Image from "next/image";
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+import { useAuth } from "@/lib/AuthContext";
 
 const page = () => {
+  const { user } = useAuth(); 
   const [image, setImage] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [data,setData]=useState({
     title:"",
     description:"",
@@ -26,6 +28,7 @@ const page = () => {
 
   const onsubmitHandler= async (e)=>{
     e.preventDefault();
+    setLoading(true);
     const formData=new FormData();
     formData.append('title',data.title);
     formData.append('description',data.description);
@@ -33,6 +36,8 @@ const page = () => {
     formData.append('author',data.author);
     formData.append('author_img',data.author_img);
     formData.append('image',image);
+    formData.append('userId', user.id);
+    
     try {
   const response = await axios.post("/api/blog", formData);
   if (response.data.success) {
@@ -52,7 +57,9 @@ const page = () => {
 } catch (error) {
   console.error(error);
   toast.error("Failed to upload blog");
-}
+} finally {
+      setLoading(false);
+    }
 }
 
 return (
@@ -98,7 +105,12 @@ return (
         <option value="Lifestyle">Lifestyle</option>
       </select>
       <br/>
-      <button type="submit" className="mt-8 w-40 h-12 bg-gray-400 text-white shadow-[-4px_4px_0px_#000000] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all">ADD</button>
+      <button type="submit" className="mt-8 w-40 h-12 bg-white-400 text-black border border-solid border-black shadow-[-4px_4px_0px_#000000]
+       active:translate-y-1 active:translate-x-1 active:shadow-none transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+        {loading && (
+          <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+        )}
+        {loading ? "Adding..." : "ADD"}</button>
     </form>
   );
 };

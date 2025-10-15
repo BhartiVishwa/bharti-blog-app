@@ -1,13 +1,24 @@
+"use client";
 import { assets } from "@/Assets/assets";
 import Sidebar from "@/components/AdminComponents/Sidebar";
 import Image from "next/image";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Layout({ children }) {
-  return (
+    const { user, loading } = useAuth();
+  
   
 
+   if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+    if (!user) {
+    return <div className="min-h-screen flex items-center justify-center">Please login first</div>;
+  }
+  return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <ToastContainer theme="dark"/>
@@ -28,6 +39,6 @@ export default function Layout({ children }) {
       </div>
     </div>
    
-  );
+);
  
 }

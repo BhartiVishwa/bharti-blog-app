@@ -2,7 +2,7 @@ import { assets } from "@/Assets/assets";
 import Image from "next/image";
 import React from "react";
 import { Trash2 } from "lucide-react";
-
+import { useAuth } from "@/lib/AuthContext";
 const BlogTableitem = ({
   author_img,
   title,
@@ -11,7 +11,13 @@ const BlogTableitem = ({
   deleteBlog,
   mongoId,
 }) => {
+    const { user } = useAuth();
   const Blogdate = new Date(date);
+
+
+  // console.log("BlogTableitem user:", user);
+  // console.log("User role:", user?.role);
+
   return (
     <tr className="bg-white border-b ">
       <th
@@ -28,12 +34,13 @@ const BlogTableitem = ({
       </th>
       <td className="px-6 py-4 ">{title ? title : "No title"}</td>
       <td className="px-6 py-4 ">{Blogdate.toDateString()}</td>
-      <td
-        onClick={() => deleteBlog(mongoId)}
-        className="cursor-pointer px-6 py-4 text-red-500 hover:text-red-700 transition-all"
-      >
-        <Trash2 size={18} />
-      </td>
+  
+  <td
+    onClick={() => deleteBlog(mongoId)}
+    className="cursor-pointer px-6 py-4 text-red-500 hover:text-red-700 transition-all"
+  >
+    <Trash2 size={18} />
+  </td>
     </tr>
   );
 };

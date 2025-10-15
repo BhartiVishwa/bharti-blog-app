@@ -72,8 +72,9 @@ export async function POST(request) {
       description: formData.get("description"),
       category: formData.get("category"),
       author: formData.get("author"),
-      author_img: uploadResponse.secure_url,
+      author_img: "/uploads/author_img.png",
       image: uploadResponse.secure_url,
+      userId: formData.get("userId"),
       date: Date.now(),
       cloudinary_id: uploadResponse.public_id,
     };
@@ -82,11 +83,63 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      message: "Blog added successfully 🚀",
+      message: "Blog added successfully",
       imageUrl: uploadResponse.secure_url,
     });
   } catch (error) {
     console.error("Cloudinary upload error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+// export async function DELETE(request) {
+//   try {
+//     await connectDB();
+//     const id = request.nextUrl.searchParams.get("id");
+    
+//     if (!id) {
+//       return NextResponse.json({ success: false, message: "Blog ID required" }, { status: 400 });
+//     }
+
+//     // Get blog to delete cloudinary image
+//     const blog = await BlogModel.findById(id);
+//     if (blog && blog.cloudinary_id) {
+//       await cloudinary.v2.uploader.destroy(blog.cloudinary_id);
+//     }
+
+//     await BlogModel.findByIdAndDelete(id);
+//     return NextResponse.json({ success: true, message: "Blog deleted successfully" });
+//   } catch (error) {
+//     console.error("DELETE Error:", error);
+//     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+//   }
+// }
+export async function DELETE(request) {
+  try {
+    await connectDB();
+    const id = request.nextUrl.searchParams.get("id");
+    const userId = request.nextUrl.searchParams.get("userId");
+    const userRole = request.nextUrl.searchParams.get("userRole");
+    
+    if (!id) {
+      return NextResponse.json({ success: false, message: "Blog ID required" }, { status: 400 });
+    }
+
+    const blog = await BlogModel.findById(id);
+    
+    // Check if user can delete this blog
+    if (userRole !== 'admin' && blog.userId.toString() !== userId) {
+      return NextResponse.json({ success: false, message: "Not authorized to delete this blog" }, { status: 403 });
+    }
+
+    if (blog && blog.cloudinary_id) {
+      await cloudinary.v2.uploader.destroy(blog.cloudinary_id);
+    }
+
+    await BlogModel.findByIdAndDelete(id);
+    return NextResponse.json({ success: true, message: "Blog deleted successfully" });
+  } catch (error) {
+    console.error("DELETE Error:", error);
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }

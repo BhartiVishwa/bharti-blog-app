@@ -3,22 +3,27 @@ import BlogTableitem from "@/components/AdminComponents/BlogTableitem";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useAuth } from "@/lib/AuthContext";
 
 const page = () => {
   const [blogs, setBlogs] = useState([]);
+  const { user } = useAuth();
 
-  const fetchBlogs = async () => {
-    const response = await axios.get("/api/blog");
+
+ const fetchBlogs = async () => {
+    const response = await axios.get("/api/blog"); // GET request to fetch blogs
     setBlogs(response.data.blogs);
-    // console.log(response.data.blogs);
   };
-  const deteleBlog = async (mongoId) => {
-    const response = await axios.delete("/api/blog", {
-      params: { id: mongoId },
-    });
-    toast.success(response.data.msg);
-    fetchBlogs();
-  };
+
+const deteleBlog = async (mongoId) => {
+  try {
+   const response = await axios.delete(`/api/blog?id=${mongoId}&userId=${user.id}&userRole=${user.role}`);
+    toast.success(response.data.message);
+    fetchBlogs(); // Refresh the list
+  } catch (error) {
+    toast.error("Failed to delete blog");
+  }
+};
 
   useEffect(() => {
     fetchBlogs();

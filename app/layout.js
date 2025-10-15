@@ -1,6 +1,6 @@
 import { Outfit } from "next/font/google";
 import "./globals.css";
-
+import { AuthProvider } from "@/lib/AuthContext";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -12,7 +12,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       
       <body className={outfit.className}>
-        {children}
+          <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

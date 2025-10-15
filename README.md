@@ -6,12 +6,8 @@ First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
@@ -39,3 +35,27 @@ to upload image to the server
 
 2. In React (and Next.js), if you want to show data inside a child component,
 you must pass it as props from the parent.
+
+
+3. Add role based authentication where 
+
+Admin: Can manage everything (add, edit, delete all blogs)
+User: Can only view blogs and manage their own blogs (add their own, delete only their own)
+
+    3 when user is ones login that verifed user can intered inside the app 
+      if user want to use another email ID so need to logout first then use other accound 
+
+4. add  who's user  login show the users name  header 
+
+5. when delete blog from the bloglist its delete from the fist blogpage and also delete in database also 
+
+6.
+Method 1:
+
+Create a separate /api/auth/admin-signup route
+
+Use an admin secret key from .env
+
+After first admin is created, remove or disable this route
+
+Let admins manage other users through admin panel

@@ -1,67 +1,63 @@
-// "use client";
-// import React, { useState } from "react";
-// import axios from "axios";
-// import { useRouter } from "next/navigation";
-// import { toast } from "react-toastify";
+"use client";
+import React, { useState } from "react";
+import axios from "axios";
+import { useAuth } from "@/lib/AuthContext";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
-// const LoginForm = () => {
-//   const router = useRouter();
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [loading, setLoading] = useState(false);
+const LoginForm = () => {
+  const { login } = useAuth();
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-//     try {
-//       const { data } = await axios.post("/api/auth/Login", { email, password });
-//       if (data.token) {
-//         // Store token in localStorage
-//         localStorage.setItem("token", data.token);
-//         localStorage.setItem("user", JSON.stringify(data.user));
-//         toast.success("Login successful!");
-//         router.push("/"); // redirect to main layout
-//       }
-//     } catch (err) {
-//       toast.error(err.response?.data?.error || "Login failed");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+     try {
+    const { data } = await axios.post("/api/auth/login", { email, password });
+    
+    // console.log("User role from API:", data.user.role);
 
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-//       <form
-//         onSubmit={handleSubmit}
-//         className="bg-white p-8 rounded shadow-md w-full max-w-md"
-//       >
-//         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-//         <input
-//           type="email"
-//           placeholder="Email"
-//           value={email}
-//           onChange={(e) => setEmail(e.target.value)}
-//           className="border p-2 rounded w-full mb-4"
-//           required
-//         />
-//         <input
-//           type="password"
-//           placeholder="Password"
-//           value={password}
-//           onChange={(e) => setPassword(e.target.value)}
-//           className="border p-2 rounded w-full mb-4"
-//           required
-//         />
-//         <button
-//           type="submit"
-//           className="bg-blue-600 text-white py-2 rounded w-full hover:bg-blue-700"
-//           disabled={loading}
-//         >
-//           {loading ? "Logging in..." : "Login"}
-//         </button>
-//       </form>
-//     </div>
-//   );
-// };
+    login(data.token, data.user);
+    toast.success(`Welcome ${data.user.role}!`);
+    router.push("/");
+  } catch (err) {
+    toast.error(err.response?.data?.error || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
-// export default LoginForm;
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="email"
+        placeholder="Enter your email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="pl-4 outline-none border border-black w-full py-3 mb-4"
+        required
+      />
+      <input
+        type="password"
+        placeholder="Enter your password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        className="pl-4 outline-none border border-black w-full py-3 mb-4"
+        required
+      />
+    
+      <button 
+        type="submit" 
+        className="border border-black py-3 px-8 w-full active:bg-gray-600 active:text-white shadow-[-7px_7px_0px_#000000] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all" 
+        disabled={loading}
+      >
+        {loading ? "Logging in..." : "Login"}
+      </button>
+    </form>
+  );
+};
+
+export default LoginForm;
