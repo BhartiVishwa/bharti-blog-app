@@ -18,12 +18,12 @@ const bloglist = () => {
   }, []);
 
   return (
-    <div>
-      <div className="flex justify-center gap-6 my-10">
+    <div className="px-4 sm:px-6">
+      <div className="flex justify-center gap-3 sm:gap-6 my-10 flex-wrap">
         <button
           onClick={() => setMenu("All")}
           className={
-            menu === "All" ? "bg-black text-white py-1 px-4 rounnded-sm" : " "
+            menu === "All" ? "bg-black text-white py-1 px-4 rounded-sm" : " "
           }
         >
           All
@@ -32,7 +32,7 @@ const bloglist = () => {
           onClick={() => setMenu("Technology")}
           className={
             menu === "Technology"
-              ? "bg-black text-white py-1 px-4 rounnded-sm"
+              ? "bg-black text-white py-1 px-4 rounded-sm"
               : " "
           }
         >
@@ -42,7 +42,7 @@ const bloglist = () => {
           onClick={() => setMenu("Startup")}
           className={
             menu === "Startup"
-              ? "bg-black text-white py-1 px-4 rounnded-sm"
+              ? "bg-black text-white py-1 px-4 rounded-sm"
               : " "
           }
         >
@@ -52,14 +52,14 @@ const bloglist = () => {
           onClick={() => setMenu("Lifestyle")}
           className={
             menu === "Lifestyle"
-              ? "bg-black text-white py-1 px-4 rounnded-sm"
+              ? "bg-black text-white py-1 px-4 rounded-sm"
               : " "
           }
         >
           Lifestyle
         </button>
       </div>
-      <div className="flex flex-wrap justify-center gap-6 mb-16 xl:max-24">
+      <div className="flex flex-wrap justify-center gap-4 sm:gap-6 mb-16">
         {blogs
           .filter((item) => (menu === "All" ? true : item.category === menu))
           .map((item, index) => {

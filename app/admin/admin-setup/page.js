@@ -33,46 +33,70 @@ export default function AdminSetup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 border border-black shadow-[-7px_7px_0px_#000000] max-w-md w-full"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          Create Admin Account
-        </h2>
-        <input
-          type="text"
-          placeholder="Admin Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="pl-4 outline-none border border-black w-full py-3 mb-4"
-          required
-        />
-        <input
-          type="email"
-          placeholder="Admin Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="pl-4 outline-none border border-black w-full py-3 mb-4"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Admin Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="pl-4 outline-none border border-black w-full py-3 mb-4"
-          required
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="border border-black py-3 w-full active:bg-gray-600 active:text-white shadow-[-7px_7px_0px_#000000] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
+    <div className="h-screen flex items-start mt-5 justify-center bg-gray-50 p-2">
+      <div className="w-full max-w-sm">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-4 border border-black shadow-[-7px_7px_0px_#000000] w-full"
         >
-          {loading ? "Creating Admin..." : "Create Admin"}
-        </button>
-      </form>
+          <h2 className="text-lg font-bold mb-4 text-center">
+            Create Admin Account
+          </h2>
+          
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium mb-1">Admin Name</label>
+              <input
+                type="text"
+                placeholder="Enter admin name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="pl-4 outline-none border border-black w-full py-2 text-sm"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">Admin Email</label>
+              <input
+                type="email"
+                placeholder="Enter admin email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pl-4 outline-none border border-black w-full py-2 text-sm"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-1">Admin Password</label>
+              <input
+                type="password"
+                placeholder="Enter admin password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="pl-4 outline-none border border-black w-full py-2 text-sm"
+                required
+              />
+            </div>
+          </div>
+          
+          <button
+            type="submit"
+            disabled={loading}
+            className="border border-black py-2 w-full mt-4 active:bg-gray-600 active:text-white shadow-[-7px_7px_0px_#000000] active:translate-y-1 active:translate-x-1 active:shadow-none transition-all text-sm font-medium"
+          >
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                Creating Admin...
+              </div>
+            ) : (
+              "Create Admin"
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

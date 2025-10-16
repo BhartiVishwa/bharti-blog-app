@@ -17,10 +17,17 @@ export async function GET(request) {
   try {
     await connectDB();
     const blogId = request.nextUrl.searchParams.get("id");
+    const userId = request.nextUrl.searchParams.get("userId");
+    
     if (blogId) {
       const blog = await BlogModel.findById(blogId);
       return NextResponse.json({ success: true, blog });
+    } else if (userId) {
+
+      const blogs = await BlogModel.find({ userId: userId });
+      return NextResponse.json({ success: true, blogs });
     } else {
+    
       const blogs = await BlogModel.find();
       return NextResponse.json({ success: true, blogs });
     }
@@ -29,6 +36,7 @@ export async function GET(request) {
     return NextResponse.json({ success: false, message: error.message });
   }
 }
+
 
 export async function POST(request) {
   try {
@@ -71,7 +79,7 @@ export async function POST(request) {
       title: formData.get("title"),
       description: formData.get("description"),
       category: formData.get("category"),
-      author: formData.get("author"),
+      author: formData.get("author") || "Default Author",
       author_img: "/uploads/author_img.png",
       image: uploadResponse.secure_url,
       userId: formData.get("userId"),
@@ -92,28 +100,6 @@ export async function POST(request) {
   }
 }
 
-// export async function DELETE(request) {
-//   try {
-//     await connectDB();
-//     const id = request.nextUrl.searchParams.get("id");
-    
-//     if (!id) {
-//       return NextResponse.json({ success: false, message: "Blog ID required" }, { status: 400 });
-//     }
-
-//     // Get blog to delete cloudinary image
-//     const blog = await BlogModel.findById(id);
-//     if (blog && blog.cloudinary_id) {
-//       await cloudinary.v2.uploader.destroy(blog.cloudinary_id);
-//     }
-
-//     await BlogModel.findByIdAndDelete(id);
-//     return NextResponse.json({ success: true, message: "Blog deleted successfully" });
-//   } catch (error) {
-//     console.error("DELETE Error:", error);
-//     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
-//   }
-// }
 export async function DELETE(request) {
   try {
     await connectDB();
@@ -143,3 +129,54 @@ export async function DELETE(request) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }
+
+export async function PUT(request) {
+  try {
+    await connectDB();
+    const formData = await request.formData();
+    const id = formData.get("id");
+    
+    const updateData = {
+      title: formData.get("title"),
+      description: formData.get("description"),
+      category: formData.get("category"),
+      author: formData.get("author"),
+       date: Date.now(), 
+    };
+
+    const imageFile = formData.get("image");
+    if (imageFile && imageFile.size > 0) {
+      // Get current blog to delete old image from Cloudinary
+      const currentBlog = await BlogModel.findById(id);
+      
+      // Delete old image from Cloudinary
+      if (currentBlog.cloudinary_id) {
+        await cloudinary.v2.uploader.destroy(currentBlog.cloudinary_id);
+      }
+      
+      // Upload new image
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
+      const uploadFromBuffer = (buffer) =>
+        new Promise((resolve, reject) => {
+          const stream = cloudinary.v2.uploader.upload_stream(
+            { folder: "blog_images", resource_type: "image" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          streamifier.createReadStream(buffer).pipe(stream);
+        });
+
+      const uploadResponse = await uploadFromBuffer(buffer);
+      updateData.image = uploadResponse.secure_url;
+      updateData.cloudinary_id = uploadResponse.public_id;
+    }
+
+    await BlogModel.findByIdAndUpdate(id, updateData);
+    return NextResponse.json({ success: true, message: "Blog updated successfully" });
+  } catch (error) {
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+  }
+}
+

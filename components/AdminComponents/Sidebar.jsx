@@ -2,13 +2,27 @@
 import { assets } from "@/Assets/assets";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/lib/AuthContext";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
+  const sidebarRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
+
   return (
     <>
       <button
@@ -20,6 +34,7 @@ const Sidebar = () => {
 
       {/* Sidebar */}
       <div
+       ref={sidebarRef}  
         className={`fixed top-0 left-0 min-h-screen bg-slate-100 transition-transform duration-300 z-40 
         ${isOpen ? "translate-x-0" : "-translate-x-full"} 
         sm:translate-x-0 sm:static sm:flex sm:flex-col w-[13rem] sm:w-[12rem] md:w-[18rem] lg:w-[18rem] border border-black`}
@@ -56,6 +71,19 @@ const Sidebar = () => {
               Add Blog
             </p>
           </Link>
+
+           {user?.role === "user" && (
+            <Link
+              href="/admin/UserBlogs"
+              className="flex items-center gap-3 font-medium px-3 py-2 bg-white shadow-[-3px_3px_0px_#000000] w-full border border-black hover:bg-gray-50 cursor-pointer  
+          active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
+            >
+              <Image src={assets.blog_icon} alt="Your Blogs" width={20} />
+              <p className={`${isOpen ? "block" : "hidden"} sm:block`}>
+                UserBlogs
+              </p>
+            </Link>
+          )}
 
           {/* Blog List */}
           {user?.role === "admin" && (

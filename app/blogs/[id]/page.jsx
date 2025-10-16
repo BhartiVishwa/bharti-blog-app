@@ -63,7 +63,7 @@ const fetchBlogData = async () => {
           </p>
         </div>
       </div>
-      <div className="mx-auto max-w-[800px] md:mx-auto mt-[-100px] mb-10 ">
+      <div className="mx-auto max-w-[800px] md:mx-auto mt-[-100px] mb-10 px-4 ">
         <Image
           className="border-4 border-white"
           src={data.image}

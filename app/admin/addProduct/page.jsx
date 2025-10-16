@@ -14,7 +14,7 @@ const page = () => {
     title:"",
     description:"",
     category:"Startup",
-    author:"Alex Bennett",
+    author:user?.name || "",
     author_img:"/author_img.png"
 
   })
@@ -33,7 +33,7 @@ const page = () => {
     formData.append('title',data.title);
     formData.append('description',data.description);
     formData.append('category',data.category);
-    formData.append('author',data.author);
+    formData.append("author", user?.name || "");
     formData.append('author_img',data.author_img);
     formData.append('image',image);
     formData.append('userId', user.id);
@@ -47,7 +47,7 @@ const page = () => {
       title: "",
       description: "",
       category: "startup",
-      author: "Alex Bennett",
+      author: user?.name || "", 
       author_img:"/author_img.png"
 ,
     });

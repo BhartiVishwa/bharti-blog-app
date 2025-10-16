@@ -1,50 +1,53 @@
 "use client";
-import SubsTableitem from "@/components/AdminComponents/SubsTableitem";
+import BlogTableitem from "@/components/AdminComponents/BlogTableitem";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { useRouter } from "next/navigation";
+import { Trash2, Edit, ChevronLeft, ChevronRight } from "lucide-react";
 
-const page = () => {
-  const [emails, setEmails] = useState([]);
+const YourBlogsPage = () => {
+  const [blogs, setBlogs] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [emailsPerPage] = useState(5); // Show 5 emails per page
+  const [blogsPerPage] = useState(5);
+  const { user } = useAuth();
+  const router = useRouter();
 
-  const fetchEmails = async () => {
+  const fetchUserBlogs = async () => {
     try {
-      const response = await axios.get("/api/email");
-      setEmails(response.data.emails || []);
+      const response = await axios.get(`/api/blog?userId=${user.id}`);
+      setBlogs(response.data.blogs);
     } catch (error) {
-      console.error("Error fetching emails:", error);
-      toast.error("Failed to fetch emails");
+      console.error("Error fetching user blogs:", error);
     }
   };
 
-  const deleteEmail = async (mongoId) => {
+  const editBlog = (mongoId) => {
+    router.push(`/admin/editBlog/${mongoId}`);
+  };
+
+  const deleteBlog = async (mongoId) => {
     try {
-      const response = await axios.delete("/api/email", {
-        params: { id: mongoId },
-      });
-      if (response.data.success) {
-        toast.success(response.data.msg);
-        fetchEmails();
-      } else {
-        toast.error(response.data.msg || "Something went wrong");
-      }
+      const response = await axios.delete(`/api/blog?id=${mongoId}&userId=${user.id}&userRole=${user.role}`);
+      toast.success(response.data.message);
+      fetchUserBlogs();
     } catch (error) {
-      toast.error("Failed to delete email");
+      toast.error("Failed to delete blog");
     }
   };
 
   useEffect(() => {
-    fetchEmails();
-  }, []);
+    if (user?.id) {
+      fetchUserBlogs();
+    }
+  }, [user]);
 
-  // Pagination Logic
-  const indexOfLastEmail = currentPage * emailsPerPage;
-  const indexOfFirstEmail = indexOfLastEmail - emailsPerPage;
-  const currentEmails = emails.slice(indexOfFirstEmail, indexOfLastEmail);
-  const totalPages = Math.ceil(emails.length / emailsPerPage);
+
+  const indexOfLastBlog = currentPage * blogsPerPage;
+  const indexOfFirstBlog = indexOfLastBlog - blogsPerPage;
+  const currentBlogs = blogs.slice(indexOfFirstBlog, indexOfLastBlog);
+  const totalPages = Math.ceil(blogs.length / blogsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -52,29 +55,33 @@ const page = () => {
     <div className="flex-1 p-4 sm:p-6 lg:p-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">All Subscriptions</h1>
-        <p className="text-gray-600 mt-1">Total: {emails.length} subscriptions</p>
+        <h1 className="text-2xl font-bold text-gray-900">Your Blogs</h1>
+        <p className="text-gray-600 mt-1">Total: {blogs.length} blogs</p>
       </div>
 
-      {/* Desktop Table View */}
+      
       <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Email</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Author</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Blog Title</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Date</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {currentEmails.map((item, index) => (
-                <SubsTableitem
+              {currentBlogs.map((item, index) => (
+                <BlogTableitem
                   key={index}
                   mongoId={item._id}
-                  deleteEmail={deleteEmail}
-                  email={item.email}
+                  title={item.title}
+                  author={item.author}
+                  author_img={item.author_img}
                   date={item.date}
+                  deleteBlog={deleteBlog}
+                  editBlog={editBlog}
                 />
               ))}
             </tbody>
@@ -82,22 +89,31 @@ const page = () => {
         </div>
       </div>
 
-      {/* Mobile Card View */}
+  
       <div className="md:hidden space-y-4">
-        {currentEmails.map((item, index) => (
+        {currentBlogs.map((item, index) => (
           <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-start justify-between">
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-semibold text-gray-900 truncate">
-                  {item.email || "No email"}
+                  {item.title || "No title"}
                 </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  By {item.author || "Unknown"}
+                </p>
                 <p className="text-xs text-gray-500 mt-2">
                   {new Date(item.date).toDateString()}
                 </p>
               </div>
-              <div className="ml-4">
+              <div className="flex flex-col gap-2 ml-4">
                 <button
-                  onClick={() => deleteEmail(item._id)}
+                  onClick={() => editBlog(item._id)}
+                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                >
+                  <Edit size={16} />
+                </button>
+                <button
+                  onClick={() => deleteBlog(item._id)}
                   className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
                 >
                   <Trash2 size={16} />
@@ -108,15 +124,14 @@ const page = () => {
         ))}
       </div>
 
-      {/* Pagination */}
+ 
       {totalPages > 1 && (
         <div className="mt-6 flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Showing {indexOfFirstEmail + 1} to {Math.min(indexOfLastEmail, emails.length)} of {emails.length} subscriptions
+            Showing {indexOfFirstBlog + 1} to {Math.min(indexOfLastBlog, blogs.length)} of {blogs.length} blogs
           </div>
           
           <div className="flex items-center space-x-2">
-            {/* Previous Button */}
             <button
               onClick={() => paginate(currentPage - 1)}
               disabled={currentPage === 1}
@@ -125,7 +140,6 @@ const page = () => {
               <ChevronLeft size={16} />
             </button>
 
-            {/* Page Numbers */}
             {[...Array(totalPages)].map((_, index) => (
               <button
                 key={index + 1}
@@ -140,7 +154,6 @@ const page = () => {
               </button>
             ))}
 
-            {/* Next Button */}
             <button
               onClick={() => paginate(currentPage + 1)}
               disabled={currentPage === totalPages}
@@ -152,14 +165,13 @@ const page = () => {
         </div>
       )}
 
-      {/* Empty State */}
-      {emails.length === 0 && (
+      {blogs.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No subscriptions found</p>
+          <p className="text-gray-500">No blogs found. Start by creating your first blog!</p>
         </div>
       )}
     </div>
   );
 };
 
-export default page;
+export default YourBlogsPage;

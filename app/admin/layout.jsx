@@ -28,7 +28,7 @@ export default function Layout({ children }) {
       <div className="flex flex-col w-full">
         {/* Navbar */}
         <div className="flex items-center justify-between w-full px-12 border-b border-black" style={{paddingTop: "14px", paddingBottom: "12px"}}>
-          <h3 className="font-medium  ml-8 sm:ml-0">Admin Panel</h3>
+          <h3 className="font-medium  ml-8 sm:ml-0">{user?.role === 'admin' ? 'Admin Panel' : 'User Panel'}</h3>
           <Image src={assets.profile_icon} width={40} alt="Profile" />
         </div>
 
