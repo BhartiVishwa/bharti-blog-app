@@ -1,5 +1,6 @@
-import User from "../../../../lib/models/UserModel.js";
+
 import { connectDB } from "../../../../lib/config/db.js";
+import User from "@/lib/models/UserModel.js";
 import jwt from "jsonwebtoken";
 
 export async function POST(request) {

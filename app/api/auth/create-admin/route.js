@@ -1,5 +1,6 @@
-import User from "../../../../lib/models/UserModel.js";
+
 import { connectDB } from "../../../../lib/config/db.js";
+import User from "@/lib/models/UserModel.js";
 export async function POST(request) {
   try {
     await connectDB();
