@@ -4,12 +4,26 @@ import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
-  try {
+  try {     
     await connectDB();
     const { email, password } = await request.json();
 
+    console.log("Login attempt for:", email);
+
     const user = await User.findOne({ email });
-    if (!user || !(await user.comparePassword(password))) {
+    console.log("User found:", !!user);
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 }
+      );
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+    console.log("Password valid:", isPasswordValid);
+    
+    if (!isPasswordValid) {
       return NextResponse.json(
         { error: "Invalid credentials" },
         { status: 401 }
@@ -30,6 +44,7 @@ export async function POST(request) {
       },
     });
   } catch (error) {
+    console.error("Login error:", error);
     return NextResponse.json({ error: "Login failed" }, { status: 500 });
   }
 }
