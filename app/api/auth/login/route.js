@@ -1,7 +1,8 @@
 
 import { connectDB } from "../../../../lib/config/db.js";
-import User from "../../../../lib/models/UserModel.js";
+import User from "@/lib/models/UserModel";
 import jwt from "jsonwebtoken";
+import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
@@ -10,16 +11,16 @@ export async function POST(request) {
 
     const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) {
-      return Response.json({ error: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "24h" });
 
-    return Response.json({
+    return NextResponse.json({
   token,
-  user: { id: user._id, name: user.name, email: user.email, role: user.role  }
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
 });
   } catch (error) {
-    return Response.json({ error: "Login failed" }, { status: 500 });
+    return NextResponse.json({ error: "Login failed" }, { status: 500 });
   }
 }

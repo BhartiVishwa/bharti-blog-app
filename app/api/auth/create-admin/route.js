@@ -1,6 +1,7 @@
 
 import { connectDB } from "../../../../lib/config/db.js";
-import User from "../../../../lib/models/UserModel.js";
+import User from "@/lib/models/UserModel";
+import { NextResponse } from "next/server";
 export async function POST(request) {
   try {
     await connectDB();

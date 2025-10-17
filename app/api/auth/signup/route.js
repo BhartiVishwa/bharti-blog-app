@@ -1,7 +1,8 @@
 
 import { connectDB } from "../../../../lib/config/db.js";
-import User from "../../../../lib/models/UserModel.js";
+import User from "@/lib/models/UserModel";
 import jwt from "jsonwebtoken";
+import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
@@ -10,15 +11,15 @@ export async function POST(request) {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return Response.json({ error: "User already exists" }, { status: 400 });
+      return NextResponse.json({ error: "User already exists" }, { status: 400 });
     }
 
     const user = await User.create({ name, email, password });
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "24hr",
+      expiresIn: "24h",
     });
 
-    return Response.json({
+    return NextResponse.json({
       token,
       user: {
         id: user._id,
@@ -28,6 +29,6 @@ export async function POST(request) {
       },
     });
   } catch (error) {
-    return Response.json({ error: "Signup failed" }, { status: 500 });
+    return NextResponse.json({ error: "Signup failed" }, { status: 500 });
   }
 }
