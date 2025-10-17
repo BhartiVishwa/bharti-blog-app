@@ -1,5 +1,5 @@
 import { connectDB } from "../../../../lib/config/db.js";
-import User from "../../../../lib/models/userModel.js/index.js";
+import User from "../../../../lib/models/userModel.js";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
