@@ -1,6 +1,5 @@
-
 import { connectDB } from "../../../../lib/config/db.js";
-import User from "../../../../lib/models/UserModel.js";
+import User from "../../../../lib/models/userModel.js/index.js";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
@@ -11,7 +10,10 @@ export async function POST(request) {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return NextResponse.json({ error: "User already exists" }, { status: 400 });
+      return NextResponse.json(
+        { error: "User already exists" },
+        { status: 400 }
+      );
     }
 
     const user = await User.create({ name, email, password });
